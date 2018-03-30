@@ -89,6 +89,7 @@ class build_rust(Command):
 
         feature_args = ["--features", " ".join(features)] if features else []
 
+
         args = ["cargo", "dinghy"] if ext.dinghy else ["cargo"]
 
         if ext.dinghy and ext.dinghy_platform:
@@ -114,7 +115,7 @@ class build_rust(Command):
             if quiet:
                 args.append("-q")
 
-            if not ext.dinghy: # Not sure about this one ...
+            if not ext.dinghy:
                 args.extend(["--", '--crate-type', 'cdylib'])
 
             # OSX requires special linker argument
