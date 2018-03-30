@@ -59,7 +59,7 @@ class RustExtension:
     def __init__(self, target, path,
                  args=None, features=None, rust_version=None,
                  quiet=False, debug=None, binding=Binding.PyO3,
-                 strip=Strip.No, script=False, native=False, optional=False):
+                 strip=Strip.No, script=False, native=False, optional=False, dinghy=False, rust_x_compile_target=None, dinghy_platform=None):
         if isinstance(target, dict):
             name = '; '.join('%s=%s' % (key, val)
                              for key, val in target.items())
@@ -78,6 +78,9 @@ class RustExtension:
         self.script = script
         self.native = native
         self.optional = optional
+        self.dinghy = dinghy
+        self.rust_x_compile_target = rust_x_compile_target
+        self.dinghy_platform = dinghy_platform
 
         if features is None:
             features = []
@@ -104,6 +107,13 @@ class RustExtension:
         section = 'lib' if cfg.has_option('lib', 'name') else 'package'
         name = cfg.get(section, 'name').strip('"')
         return name.replace('-', '_').replace('.', '_')
+
+    def get_raw_lib_name(self):
+        cfg = configparser.ConfigParser()
+        cfg.read(self.path)
+        section = 'lib' if cfg.has_option('lib', 'name') else 'package'
+        name = cfg.get(section, 'name').strip('"')
+        return name.replace('.', '_')
 
     def get_rust_version(self):
         if self.rust_version is None:

@@ -1,16 +1,16 @@
 from setuptools import setup
 
-version = '0.9.1'
+version = '0.1.0'  # Unfortunately, the versioning scheme on PyPi isn't flexible enough to reflect at which version of the original source code was forked.
 
 
 setup(
-    name="setuptools-rust",
+    name="setuptools-rust-dinghy",
     version=version,
-    author='Nikolay Kim',
-    author_email='fafhrd91@gmail.com',
-    url="https://github.com/PyO3/setuptools-rust",
-    keywords='distutils setuptools rust',
-    description="Setuptools rust extension plugin",
+    author='Anthony Reinette',
+    author_email='dantho361@hotmail.com',
+    url="https://github.com/snipsco-forks/setuptools-rust",
+    keywords='distutils setuptools rust dinghy cross compilation',
+    description="Setuptools rust extension plugin that support cross-compilation with cargo-dinghy",
     long_description='\n\n'.join(
         (open('README.rst').read(), open('CHANGES.rst').read())),
     license='MIT',

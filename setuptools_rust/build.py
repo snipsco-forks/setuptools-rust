@@ -87,30 +87,39 @@ class build_rust(Command):
 
         quiet = self.qbuild or ext.quiet
 
-        # build cargo command
         feature_args = ["--features", " ".join(features)] if features else []
 
+
+        args = ["cargo", "dinghy"] if ext.dinghy else ["cargo"]
+
+        if ext.dinghy and ext.dinghy_platform:
+            args.extend(["--platform", ext.dinghy_platform])
+
         if executable:
-            args = (["cargo", "build", "--manifest-path", ext.path]
-                    + feature_args
-                    + list(ext.args or []))
+            args = ( args
+                     + ["build", "--manifest-path", ext.path]
+                     + feature_args
+                     + list(ext.args or []))
             if not debug_build:
                 args.append("--release")
             if quiet:
                 args.append("-q")
-        else:
-            args = (["cargo", "rustc", "--lib", "--manifest-path", ext.path]
-                    + feature_args
-                    + list(ext.args or []))
+        else:  # It's not an executable ...
+            args.extend( ["build", "-p", ext.get_raw_lib_name()] if ext.dinghy else ["rustc", "--lib", "--manifest-path", ext.path])
+            args = ( args
+                     + feature_args \
+                     + list(ext.args or []))
+
             if not debug_build:
                 args.append("--release")
             if quiet:
                 args.append("-q")
 
-            args.extend(["--", '--crate-type', 'cdylib'])
+            if not ext.dinghy:
+                args.extend(["--", '--crate-type', 'cdylib'])
 
             # OSX requires special linker argument
-            if sys.platform == "darwin":
+            if sys.platform == "darwin" and not ext.dinghy:
                 args.extend(["-C", "link-arg=-undefined",
                              "-C", "link-arg=dynamic_lookup"])
 
@@ -149,7 +158,10 @@ class build_rust(Command):
             suffix = "release"
 
         # location of cargo compiled files
-        artifactsdir = os.path.join(targetdir, suffix)
+        if ext.dinghy:
+            artifactsdir = os.path.join(os.path.join(targetdir, ext.rust_x_compile_target), suffix)
+        else:
+            artifactsdir = os.path.join(targetdir, suffix)
         dylib_paths = []
 
         if executable:
@@ -163,7 +175,7 @@ class build_rust(Command):
                         raise DistutilsExecError(
                             'rust build failed; '
                             'unable to find executable "%s" in %s' % (
-                                name, target_dir))
+                                name, targetdir))
                 else:
                     # search executable
                     for name in os.listdir(artifactsdir):
@@ -178,14 +190,17 @@ class build_rust(Command):
             if not dylib_paths:
                 raise DistutilsExecError(
                     "rust build failed; unable to find executable in %s" %
-                    target_dir)
+                    targetdir)
         else:
-            if sys.platform == "win32":
-                dylib_ext = "dll"
-            elif sys.platform == "darwin":
-                dylib_ext = "dylib"
+            if not ext.dinghy:
+                if sys.platform == "win32":
+                    dylib_ext = "dll"
+                elif sys.platform == "darwin":
+                    dylib_ext = "dylib"
+                else:
+                    dylib_ext = "so"
             else:
-                dylib_ext = "so"
+                dylib_ext = "so"  # FIXME
 
             wildcard_so = "*{}.{}".format(ext.get_lib_name(), dylib_ext)
 
