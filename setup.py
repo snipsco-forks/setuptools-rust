@@ -4,7 +4,7 @@ version = '0.1.0'  # Unfortunately, the versioning scheme on PyPi isn't flexible
 
 
 setup(
-    name="setuptools-rust-dinghy",
+    name="setuptools-rust",
     version=version,
     author='Anthony Reinette',
     author_email='dantho361@hotmail.com',
